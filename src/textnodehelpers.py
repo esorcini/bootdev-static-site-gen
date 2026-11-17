@@ -192,6 +192,25 @@ def is_unordered_list(block: str) -> bool:
         result = True
     return result
 
+def is_ordered_list(block: str) -> bool:
+    result = False
+    tmp_lines = block.split("\n")
+
+    if not tmp_lines[0].startswith("1. "):
+        return False
+
+    for index, line in enumerate(tmp_lines):
+        try:
+            tmp_lines[index - 1]
+        except IndexError:
+            continue
+
+        if not line.startswith(f"{index + 1}. "):
+            return False
+        result = True
+
+    return result
+
 def block_to_block_type(block: str) -> BlockType:
     if is_heading(block):
         return BlockType.HEADING
@@ -201,4 +220,6 @@ def block_to_block_type(block: str) -> BlockType:
         return BlockType.QUOTE
     elif is_unordered_list(block):
         return BlockType.U_LIST
+    elif is_ordered_list(block):
+        return BlockType.O_LIST
     return BlockType.PARAGRAPH

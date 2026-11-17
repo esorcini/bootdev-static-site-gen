@@ -354,3 +354,38 @@ This is the same paragraph on a new line
         md = "-line -line 2 - line 3"
         block_type = block_to_block_type(md)
         self.assertNotEqual(block_type, BlockType.U_LIST)
+
+    def test_block_to_blocktype_o_list_min(self):
+        md = "1. line"
+        block_type = block_to_block_type(md)
+        self.assertEqual(block_type, BlockType.O_LIST)
+
+    def test_block_to_blocktype_o_list_max(self):
+        md = "1. line\n2. line2\n3. line3"
+        block_type = block_to_block_type(md)
+        self.assertEqual(block_type, BlockType.O_LIST)
+
+    def test_block_to_blocktype_o_list_wrong_syntax_1(self):
+        md = "1. line\n3. line2\n4. line 3"
+        block_type = block_to_block_type(md)
+        self.assertNotEqual(block_type, BlockType.U_LIST)
+
+    def test_block_to_blocktype_o_list_wrong_syntax_2(self):
+        md = "1.line\n2. line2\n3. line 3"
+        block_type = block_to_block_type(md)
+        self.assertNotEqual(block_type, BlockType.U_LIST)
+
+    def test_block_to_blocktype_o_list_wrong_syntax_3(self):
+        md = "1. line\n3. line2\n4.line 3"
+        block_type = block_to_block_type(md)
+        self.assertNotEqual(block_type, BlockType.U_LIST)
+
+    def test_block_to_blocktype_o_list_wrong_syntax_4(self):
+        md = "1. line\n2. line2\n6. line 3"
+        block_type = block_to_block_type(md)
+        self.assertNotEqual(block_type, BlockType.U_LIST)
+
+    def test_block_to_blocktype_normal_text(self):
+        md = "This is a normal text line"
+        block_type = block_to_block_type(md)
+        self.assertEqual(block_type, BlockType.PARAGRAPH)
