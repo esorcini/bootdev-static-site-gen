@@ -1,9 +1,8 @@
 import unittest
 
-from src.enums import BlockType, TextType
-from src.leafnode import LeafNode
-from src.textnode import TextNode
-from src.textnodehelpers import InvalidMarkdownSyntax, block_to_block_type, extract_markdown_images, extract_markdown_links, markdown_to_blocks, markdown_to_html_node, markdown_to_o_list, markdown_to_u_list, split_nodes_delimiter, split_nodes_image, split_nodes_link, text_to_textnodes
+from src.model.enums import BlockType, TextType
+from src.model.textnode import TextNode
+from src.textnodehelpers import *
 
 
 class TestNodeHelpers(unittest.TestCase):
@@ -62,7 +61,7 @@ class TestNodeHelpers(unittest.TestCase):
     def test_split_nodes_delimiter_bad_syntax(self):
         node = TextNode("This is text with an _italic block` word", TextType.TEXT)
         with self.assertRaises(InvalidMarkdownSyntax):
-            new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
+            split_nodes_delimiter([node], "`", TextType.CODE)
 
     def test_extract_markdown_images(self):
         text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"

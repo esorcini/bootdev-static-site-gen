@@ -1,10 +1,10 @@
 import re
 
-from src.enums import BlockType, TextType
-from src.htmlnode import HTMLNode
-from src.leafnode import LeafNode
-from src.parentnode import ParentNode
-from src.textnode import NonSupportedNodeError, TextNode
+from src.model.enums import BlockType, TextType
+from src.model.htmlnode import HTMLNode
+from src.model.leafnode import LeafNode
+from src.model.parentnode import ParentNode
+from src.model.textnode import NonSupportedNodeError, TextNode
 
 
 class InvalidMarkdownSyntax(Exception):

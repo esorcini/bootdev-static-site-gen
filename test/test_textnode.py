@@ -1,7 +1,7 @@
 import unittest
 
-from src.enums import TextType
-from src.textnode import TextNode
+from src.model.enums import TextType
+from src.model.textnode import TextNode
 from src.textnodehelpers import text_node_to_html
 
 

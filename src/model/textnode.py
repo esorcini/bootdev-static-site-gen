@@ -1,4 +1,4 @@
-from src.enums import TextType
+from src.model.enums import TextType
 
 
 class NonSupportedNodeError(Exception):
