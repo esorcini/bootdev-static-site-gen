@@ -1,4 +1,5 @@
 from src.htmlnode import HTMLNode
+from src.leafnode import LeafNode
 
 
 class ParentNode(HTMLNode):

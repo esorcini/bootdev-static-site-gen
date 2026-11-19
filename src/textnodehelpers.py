@@ -1,7 +1,9 @@
 import re
 
 from src.enums import BlockType, TextType
+from src.htmlnode import HTMLNode
 from src.leafnode import LeafNode
+from src.parentnode import ParentNode
 from src.textnode import NonSupportedNodeError, TextNode
 
 
@@ -223,3 +225,96 @@ def block_to_block_type(block: str) -> BlockType:
     elif is_ordered_list(block):
         return BlockType.O_LIST
     return BlockType.PARAGRAPH
+
+def markdown_to_heading(block: str) -> LeafNode:
+    # tag -> which h tag depending on the number of #
+    # value -> the text after the space
+    tmp = block.split(maxsplit=1)
+    tag = f"h{tmp[0].count("#")}"
+    value = tmp[1]
+    return LeafNode(tag, value)
+
+def markdown_to_code_block(block: str) -> ParentNode:
+    parent_tag = "pre"
+    children: list[HTMLNode] = []
+
+    tmp_lines = block.split("\n")
+    tmp_lines = tmp_lines[1:-1]
+    code_str = ""
+
+    for line in tmp_lines:
+        code_str += f"{line.strip()}\n"
+
+    code_node = TextNode(code_str, TextType.CODE)
+    children.append(text_node_to_html(code_node))
+
+    return ParentNode(parent_tag, children)
+
+def markdown_to_paragraph(block: str) -> ParentNode:
+    parent_tag = "p"
+    clean_block = block.replace("\n"," ")
+    inline_nodes = text_to_textnodes(clean_block)
+    paragraph_nodes: list[HTMLNode] = [ text_node_to_html(node) for node in inline_nodes]
+    return ParentNode(parent_tag, paragraph_nodes)
+
+def markdown_to_quoteblock(block: str) -> ParentNode:
+    parent_tag = "blockquote"
+    quote_lines = block.split("\n")
+    clean_quote_lines = [ line.replace(">","").strip() for line in quote_lines]
+    inline_nodes = text_to_textnodes(" ".join(clean_quote_lines))
+    blockquote_nodes: list[HTMLNode] = [ text_node_to_html(node) for node in inline_nodes]
+    return ParentNode(parent_tag, blockquote_nodes)
+
+def markdown_to_u_list(block: str) -> ParentNode:
+    parent_tag = "ul"
+    quote_lines = block.strip().split("\n")
+    clean_quote_lines = [ line.replace("-","").strip() for line in quote_lines]
+    children: list[HTMLNode] = []
+    for line in clean_quote_lines:
+        inline_nodes = text_to_textnodes(line)
+        inline_html_nodes: list[HTMLNode] = [ text_node_to_html(node) for node in inline_nodes ]
+        list_line = ParentNode("li", inline_html_nodes)
+        children.append(list_line)
+    return ParentNode(parent_tag, children)
+
+def markdown_to_o_list(block: str) -> ParentNode:
+    parent_tag = "ol"
+    quote_lines = block.strip().split("\n")
+    clean_quote_lines = [ re.sub(r"\d+\. ","",line,count=1) for line in quote_lines]
+    children: list[HTMLNode] = []
+    for line in clean_quote_lines:
+        inline_nodes = text_to_textnodes(line)
+        inline_html_nodes: list[HTMLNode] = [ text_node_to_html(node) for node in inline_nodes ]
+        list_line = ParentNode("li", inline_html_nodes)
+        children.append(list_line)
+    return ParentNode(parent_tag, children)
+
+def markdown_to_html_node(markdown) -> ParentNode:
+    root_tag = "article"
+    blocks = markdown_to_blocks(markdown)
+    children: list[HTMLNode] = []
+
+    for block in blocks:
+        block_type = block_to_block_type(block)
+
+        match block_type:
+            case BlockType.HEADING:
+                node = markdown_to_heading(block)
+                children.append(node)
+            case BlockType.CODE:
+                node = markdown_to_code_block(block)
+                children.append(node)
+            case BlockType.PARAGRAPH:
+                node = markdown_to_paragraph(block)
+                children.append(node)
+            case BlockType.QUOTE:
+                node = markdown_to_quoteblock(block)
+                children.append(node)
+            case BlockType.U_LIST:
+                node = markdown_to_u_list(block)
+                children.append(node)
+            case BlockType.O_LIST:
+                node = markdown_to_o_list(block)
+                children.append(node)
+
+    return ParentNode(root_tag, children)

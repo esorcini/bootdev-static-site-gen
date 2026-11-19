@@ -1,8 +1,9 @@
 import unittest
 
-from src.enums import BlockType
-from src.textnode import TextNode, TextType
-from src.textnodehelpers import InvalidMarkdownSyntax, block_to_block_type, extract_markdown_images, extract_markdown_links, markdown_to_blocks, split_nodes_delimiter, split_nodes_image, split_nodes_link, text_to_textnodes
+from src.enums import BlockType, TextType
+from src.leafnode import LeafNode
+from src.textnode import TextNode
+from src.textnodehelpers import InvalidMarkdownSyntax, block_to_block_type, extract_markdown_images, extract_markdown_links, markdown_to_blocks, markdown_to_html_node, markdown_to_o_list, markdown_to_u_list, split_nodes_delimiter, split_nodes_image, split_nodes_link, text_to_textnodes
 
 
 class TestNodeHelpers(unittest.TestCase):
@@ -389,3 +390,91 @@ This is the same paragraph on a new line
         md = "This is a normal text line"
         block_type = block_to_block_type(md)
         self.assertEqual(block_type, BlockType.PARAGRAPH)
+
+    def test_markdown_to_html_heading_1(self):
+        md = "# Title 1"
+        expected_node = "<article><h1>Title 1</h1></article>"
+        parent_node = markdown_to_html_node(md).to_html()
+        self.assertEqual(parent_node, expected_node)
+
+    def test_markdown_to_html_heading_6(self):
+        md = "###### Title"
+        expected_node = "<article><h6>Title</h6></article>"
+        parent_node = markdown_to_html_node(md).to_html()
+        self.assertEqual(parent_node, expected_node)
+
+    def test_markdown_to_html_heading_faulty(self):
+        md = "Title without bangs"
+        expected_node = "<article><h1>Title 1</h1></article>"
+        parent_node = markdown_to_html_node(md).to_html()
+        self.assertNotEqual(parent_node, expected_node)
+
+    def test_markdown_to_html_codeblock(self):
+        md = """
+    ```
+    This is text that _should_ remain
+    the **same** even with inline stuff
+    ```
+    """
+
+        expected_node = "<article><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></article>"
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(html,expected_node)
+
+    def test_markdown_to_html_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+        expected_node = "<article><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></article>"
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(html,expected_node)
+
+
+
+    def test_markdown_to_html_blockquotes(self):
+        md = """
+> "I am in fact a Hobbit in all but size."
+>
+> -- J.R.R. Tolkien
+"""
+        expected_node = '<article><blockquote>"I am in fact a Hobbit in all but size."  -- J.R.R. Tolkien</blockquote></article>'
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(html,expected_node)
+
+    def test_markdown_to_html_u_list(self):
+        md = """
+- You can spend years studying the legendarium and still not understand its depths
+- It can be enjoyed by children and adults alike
+- Disney _didn't ruin it_ (okay, but Amazon might have)
+- It created an entirely new genre of fantasy
+"""
+        expected_node = "<ul><li>You can spend years studying the legendarium and still not understand its depths</li><li>It can be enjoyed by children and adults alike</li><li>Disney <i>didn't ruin it</i> (okay, but Amazon might have)</li><li>It created an entirely new genre of fantasy</li></ul>"
+        node = markdown_to_u_list(md)
+        html = node.to_html()
+        self.assertEqual(html,expected_node)
+
+    def test_markdown_to_html_o_list(self):
+        md = """
+1. Gandalf
+2. Bilbo
+3. Sam
+4. Glorfindel
+5. Galadriel
+6. Elrond
+7. Thorin
+8. Sauron
+9. Aragorn
+    """
+        expected_node = "<ol><li>Gandalf</li><li>Bilbo</li><li>Sam</li><li>Glorfindel</li><li>Galadriel</li><li>Elrond</li><li>Thorin</li><li>Sauron</li><li>Aragorn</li></ol>"
+        node = markdown_to_o_list(md)
+        html = node.to_html()
+        self.assertEqual(html,expected_node)
