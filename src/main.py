@@ -78,7 +78,6 @@ def main():
     except IndexError:
         basepath = ""
 
-    # copy_files("./static", "./public")
     copy_files("./static", "./docs")
     generate_pages_recursive(basepath, "content", "template.html", "docs")
 

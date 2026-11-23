@@ -226,13 +226,12 @@ def block_to_block_type(block: str) -> BlockType:
         return BlockType.O_LIST
     return BlockType.PARAGRAPH
 
-def markdown_to_heading(block: str) -> LeafNode:
-    # tag -> which h tag depending on the number of #
-    # value -> the text after the space
+def markdown_to_heading(block: str) -> ParentNode:
     tmp = block.split(maxsplit=1)
-    tag = f"h{tmp[0].count("#")}"
-    value = tmp[1]
-    return LeafNode(tag, value)
+    parent_tag = f"h{tmp[0].count("#")}"
+    inline_nodes = text_to_textnodes(tmp[1])
+    heading_nodes: list[HTMLNode] = [ text_node_to_html(node) for node in inline_nodes]
+    return ParentNode(parent_tag, heading_nodes)
 
 def markdown_to_code_block(block: str) -> ParentNode:
     parent_tag = "pre"
