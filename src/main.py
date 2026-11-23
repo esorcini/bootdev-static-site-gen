@@ -41,10 +41,6 @@ def generate_page(from_path: str, template_path: str, dest_path: str) -> None:
     with open(template_path) as template_file:
         template = template_file.read()
 
-    target_dir = os.path.dirname(dest_path)
-    if not os.path.exists(target_dir):
-        os.makedirs(target_dir)
-
     html_string = markdown_to_html_node(markdown).to_html()
     html_title = extract_title(markdown)
 
@@ -54,8 +50,25 @@ def generate_page(from_path: str, template_path: str, dest_path: str) -> None:
     with open(dest_path, "w") as html_file:
         html_file.write(html_page)
 
+def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir_path: str) -> None:
+    if not os.path.exists(dir_path_content):
+        raise OSError(f"Content folder '{dir_path_content}' was not found")
+    if not os.path.exists(dest_dir_path):
+        os.makedirs(dest_dir_path)
+
+    for entry in os.listdir(dir_path_content):
+        entry_content_path = dir_path_content + f"/{entry}"
+        entry_html_write_path = dest_dir_path + f"/{entry.replace(".md",".html")}"
+
+        if os.path.isdir(entry_content_path):
+            generate_pages_recursive(entry_content_path, template_path, entry_html_write_path)
+        elif os.path.isfile(entry_content_path):
+            generate_page(entry_content_path, template_path, entry_html_write_path)
+        else:
+            raise OSError(f"The entry '{entry_content_path}' is not a file nor a directory")
+
 def main():
     copy_files("./static","./public")
-    generate_page("content/index.md", "template.html", "public/index.html")
+    generate_pages_recursive("content", "template.html", "public")
 
 main()
