@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 
 from src.textnodehelpers import extract_title, markdown_to_html_node
 
@@ -30,7 +31,7 @@ def copy_files(source: str, target: str):
 
     copy_files_r(source, target)
 
-def generate_page(from_path: str, template_path: str, dest_path: str) -> None:
+def generate_page(basepath: str, from_path: str, template_path: str, dest_path: str) -> None:
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     markdown: str | None = None
     template: str | None = None
@@ -47,10 +48,14 @@ def generate_page(from_path: str, template_path: str, dest_path: str) -> None:
     html_page = template.replace("{{ Title }}", html_title)
     html_page = html_page.replace("{{ Content }}", html_string)
 
+    if basepath:
+        html_page = html_page.replace('href="/', f'href="{basepath}')
+        html_page = html_page.replace('src="/', f'src="{basepath}')
+
     with open(dest_path, "w") as html_file:
         html_file.write(html_page)
 
-def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir_path: str) -> None:
+def generate_pages_recursive(basepath: str, dir_path_content: str, template_path: str, dest_dir_path: str) -> None:
     if not os.path.exists(dir_path_content):
         raise OSError(f"Content folder '{dir_path_content}' was not found")
     if not os.path.exists(dest_dir_path):
@@ -61,14 +66,20 @@ def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir
         entry_html_write_path = dest_dir_path + f"/{entry.replace(".md",".html")}"
 
         if os.path.isdir(entry_content_path):
-            generate_pages_recursive(entry_content_path, template_path, entry_html_write_path)
+            generate_pages_recursive(basepath, entry_content_path, template_path, entry_html_write_path)
         elif os.path.isfile(entry_content_path):
-            generate_page(entry_content_path, template_path, entry_html_write_path)
+            generate_page(basepath, entry_content_path, template_path, entry_html_write_path)
         else:
             raise OSError(f"The entry '{entry_content_path}' is not a file nor a directory")
 
 def main():
-    copy_files("./static","./public")
-    generate_pages_recursive("content", "template.html", "public")
+    try:
+        basepath = sys.argv[1]
+    except IndexError:
+        basepath = ""
+
+    # copy_files("./static", "./public")
+    copy_files("./static", "./docs")
+    generate_pages_recursive(basepath, "content", "template.html", "docs")
 
 main()

@@ -1,4 +1,3 @@
 __pycache__/
 .venv/
-example_md
-public/
+.DS_Store
