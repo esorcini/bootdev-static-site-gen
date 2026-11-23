@@ -8,7 +8,7 @@
     "adapter": "Debugpy",
     "request": "launch",
     "module": "unittest",
-    "args": ["discover", "-s", "src"],
+    "args": ["discover", "-s", "test"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "python": "$ZED_WORKTREE_ROOT/.venv/bin/python"
   }

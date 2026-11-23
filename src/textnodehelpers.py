@@ -318,3 +318,15 @@ def markdown_to_html_node(markdown) -> ParentNode:
                 children.append(node)
 
     return ParentNode(root_tag, children)
+
+def extract_title(markdown) -> str:
+    blocks = markdown_to_blocks(markdown)
+
+    for block in blocks:
+        lines = block.split("\n")
+
+        for line in lines:
+            if line.startswith("# "):
+                return line.replace("# ", "")
+
+    raise InvalidMarkdownSyntax("Markdown must have a main header #")

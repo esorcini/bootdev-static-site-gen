@@ -477,3 +477,26 @@ This is another paragraph with _italic_ text and `code` here
         node = markdown_to_o_list(md)
         html = node.to_html()
         self.assertEqual(html,expected_node)
+
+    def test_extract_title(self):
+        md = """
+# Tolkien Fan Club
+
+![JRR Tolkien sitting](/images/tolkien.png)
+
+Here's the deal, **I like Tolkien**.
+        """
+
+        expected = "Tolkien Fan Club"
+        title = extract_title(md)
+        self.assertEqual(title, expected)
+
+    def test_extract_title_faulty(self):
+        md = """
+![JRR Tolkien sitting](/images/tolkien.png)
+
+Here's the deal, **I like Tolkien**.
+    """
+
+        with self.assertRaises(InvalidMarkdownSyntax):
+            title = extract_title(md)

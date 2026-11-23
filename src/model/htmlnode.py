@@ -20,11 +20,7 @@ class HTMLNode:
         if not self.props:
             return ""
 
-        formatted_props = ""
-        for key, value in self.props.items():
-            formatted_props += f' {key}="{value}"'
-
-        return formatted_props
+        return "".join([f' {key}={value}' for key, value in self.props.items()])
 
     def __repr__(self) -> str:
         html_node = f"tag: {self.tag}" if self.tag else ""
